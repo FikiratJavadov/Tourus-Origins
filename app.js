@@ -1,51 +1,43 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
-const fs = require("fs");
+const morgan = require("morgan");
+require("dotenv").config({ path: "./condig.env" });
+
+//!Routers:
+const tourRouter = require("./routes/tourRouter");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-const tours = JSON.parse(fs.readFileSync("./tours-data.json"));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
-app.get("/tour", (req, res) => {
+app.use((req, res, next) => {
+  console.log("Node.js'e salam deyersen");
+  next();
+});
+
+app.use("/tour", tourRouter);
+
+app.use((req, res) => {
   res.json({
-    success: true,
-    data: {
-      tours,
-    },
+    success: false,
+    message: `${req.originalUrl} does not exist!`,
   });
 });
 
-app.get("/tour/:id", (req, res) => {
-  const id = req.params.id;
+//! Start application:
+const DB = process.env.DB_STRING.replace("<password>", process.env.DB_PASSWORD);
 
-  const tour = tours.find((t) => t.id == id);
+mongoose.connect(DB, (err) => {
+  if (err) return console.log(err);
 
-  if (!tour) return res.send({ success: false, message: "Invalid ID" });
+  console.log("MongoDb connected.");
 
-  res.json({ success: true, data: { tour } });
+  const PORT = process.env.PORT;
+  app.listen(PORT, () => console.log(`Server running on port: ${PORT}.`));
 });
-
-app.post("/tour", (req, res) => {
-  const id = tours[tours.length - 1].id + 1;
-
-  const newTour = { ...req.body, id: id };
-  const newTours = [...tours, newTour];
-
-  fs.writeFileSync("./tours-data.json", JSON.stringify(newTours));
-
-  res.json({
-    success: true,
-    data: {
-      newTour,
-    },
-  });
-});
-
-app.get("/tour/id", () => {});
-app.get("/tour/id", () => {});
-
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
