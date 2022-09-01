@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 app.use("/tour", tourRouter);
 
 app.use((req, res) => {
-  res.json({
+  res.status(400).json({
     success: false,
     message: `${req.originalUrl} does not exist!`,
   });

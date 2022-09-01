@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const tourSchema = mongoose.Schema(
   {
@@ -32,6 +33,7 @@ const tourSchema = mongoose.Schema(
     ratingsQuantity: {
       type: Number,
     },
+    slug: String,
     price: {
       type: Number,
       required: [true, "Price must be defined!"],
@@ -51,6 +53,11 @@ const tourSchema = mongoose.Schema(
       required: [true, "Image cover must be defined!"],
     },
 
+    delted: {
+      type: Boolean,
+      default: false,
+    },
+
     images: {
       type: [String],
     },
@@ -59,8 +66,43 @@ const tourSchema = mongoose.Schema(
       required: [true, "Date must be defined!"],
     },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true } }
 );
+
+//!Virtuals
+
+tourSchema.virtual("week").get(function () {
+  return this.duration / 7;
+});
+
+//!pre/post save - middleware
+
+tourSchema.pre("save", function (next) {
+  this.slug = slugify(this.name, "-");
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post("save", function (document, next) {
+  this.slug = slugify(this.name, "-");
+  console.log(Date.now() - this.start);
+  next();
+});
+
+//!pre/post find
+
+tourSchema.pre("find", function (next) {
+  this.find({ delted: false });
+  next();
+});
+
+//!pre/post aggregate
+
+tourSchema.pre("aggregate", function (next) {
+  this.pipeline().unshift({ $match: { delted: { $ne: true } } });
+  console.log(this.pipeline());
+  next();
+});
 
 const Tour = mongoose.model("tour", tourSchema);
 

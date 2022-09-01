@@ -44,7 +44,7 @@ class GlobalFilter {
 
   paginate() {
     const page = parseInt(this.queryStr.page) || 1;
-    const limit = parseInt(this.queryStr.limit) || 5;
+    const limit = parseInt(this.queryStr.limit) || 10;
     const skip = (page - 1) * limit;
     this.query.skip(skip).limit(limit);
 
