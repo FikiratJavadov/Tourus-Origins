@@ -4,6 +4,9 @@ const cors = require("cors");
 const morgan = require("morgan");
 require("dotenv").config({ path: "./condig.env" });
 
+const GlobalError = require("./error/GlobalError");
+const globaleErrorHandler = require("./error/errorHandler");
+
 //!Routers:
 const tourRouter = require("./routes/tourRouter");
 
@@ -23,12 +26,12 @@ app.use((req, res, next) => {
 
 app.use("/tour", tourRouter);
 
-app.use((req, res) => {
-  res.status(400).json({
-    success: false,
-    message: `${req.originalUrl} does not exist!`,
-  });
+app.use((req, res, next) => {
+  next(new GlobalError(`${req.originalUrl} does not exist!`, 500));
 });
+
+//! Global Error Handler
+app.use(globaleErrorHandler);
 
 //! Start application:
 const DB = process.env.DB_STRING.replace("<password>", process.env.DB_PASSWORD);

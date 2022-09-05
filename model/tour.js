@@ -7,6 +7,7 @@ const tourSchema = mongoose.Schema(
       type: String,
       required: [true, "Name must be defined!"],
       unique: true,
+      trim: true,
     },
 
     duration: {
@@ -17,6 +18,8 @@ const tourSchema = mongoose.Schema(
     maxGroupSize: {
       type: Number,
       required: [true, "Group size must be defined!"],
+      min: 5,
+      max: 15,
     },
 
     difficulty: {
@@ -27,7 +30,7 @@ const tourSchema = mongoose.Schema(
 
     ratingsAverage: {
       type: Number,
-      required: [true, "Rating must be defined!"],
+      default: 4.5,
     },
 
     ratingsQuantity: {
@@ -39,9 +42,22 @@ const tourSchema = mongoose.Schema(
       required: [true, "Price must be defined!"],
     },
 
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (el) {
+          return this.price > el;
+        },
+
+        message: "Discount of ({VALUE}) can not exceed the price",
+      },
+    },
+
     summary: {
       type: String,
       required: [true, "Summary must be defined!"],
+      minLength: 10,
+      maxLength: 50,
     },
 
     description: {
