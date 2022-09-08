@@ -9,6 +9,7 @@ const globaleErrorHandler = require("./error/errorHandler");
 
 //!Routers:
 const tourRouter = require("./routes/tourRouter");
+const userRouter = require("./routes/userRouter");
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/tour", tourRouter);
+app.use("/user", userRouter);
 
 app.use((req, res, next) => {
   next(new GlobalError(`${req.originalUrl} does not exist!`, 500));
