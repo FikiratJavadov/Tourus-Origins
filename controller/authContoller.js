@@ -2,6 +2,8 @@ const User = require("../model/user");
 const { asyncCatch } = require("../utils/asyncCatch");
 const GlobalError = require("../error/GlobalError");
 const jwt = require("jsonwebtoken");
+const sendEmail = require("../utils/email");
+const crypto = require("crypto");
 
 const signJWT = (id) => {
   const token = jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -52,3 +54,66 @@ exports.login = asyncCatch(async (req, res, next) => {
     token,
   });
 });
+
+exports.forgetPassword = asyncCatch(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user)
+    return next(new GlobalError("User with this email does not exist!", 404));
+
+  const resetToken = await user.hashResetPassword();
+  await user.save({ validateBeforeSave: false });
+
+  const urlString = `${req.protocol}://${req.get("host")}/${resetToken}`;
+
+  await sendEmail({
+    email: user.email,
+    subject: "Change password!",
+    message: `Please follow the link: ${urlString}`,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Email sent!",
+  });
+});
+
+exports.resetPassword = asyncCatch(async (req, res, next) => {
+  const token = req.params.token;
+  const { password, confirmPassword } = req.body;
+
+  const hashedPassword = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetToken: hashedPassword,
+    resetTime: { $gt: new Date() },
+  });
+
+  if (!user) return next(new GlobalError("Token wrong or expired"));
+
+  user.password = password;
+  user.confirmPassword = confirmPassword;
+  user.resetToken = undefined;
+  user.resetTime = undefined;
+  await user.save();
+
+  const accessToken = signJWT(user._id);
+
+  res.json({
+    success: true,
+    token: accessToken,
+  });
+});
+
+
+
+
+
+
+
+
