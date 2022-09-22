@@ -21,7 +21,7 @@ exports.getAllTours = asyncCatch(async (req, res) => {
 exports.getOneTour = asyncCatch(async (req, res, next) => {
   const id = req.params.id;
 
-  const tour = await Tour.findById(id);
+  const tour = await Tour.findById(id).populate("guides");
 
   if (!tour) return next(new GlobalError("`Invalid ID`", 404));
 

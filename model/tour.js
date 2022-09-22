@@ -69,6 +69,24 @@ const tourSchema = mongoose.Schema(
       required: [true, "Image cover must be defined!"],
     },
 
+    locations: [
+      {
+        // type: {
+        //   place: String,
+        place: String, // },
+        coordinates: [Number],
+        description: String,
+        day: String,
+      },
+    ],
+
+    guides: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
+
     delted: {
       type: Boolean,
       default: false,

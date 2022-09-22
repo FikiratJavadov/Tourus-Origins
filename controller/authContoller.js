@@ -52,6 +52,7 @@ exports.login = asyncCatch(async (req, res, next) => {
   res.status(201).json({
     success: true,
     token,
+    user,
   });
 });
 
@@ -109,11 +110,3 @@ exports.resetPassword = asyncCatch(async (req, res, next) => {
     token: accessToken,
   });
 });
-
-
-
-
-
-
-
-

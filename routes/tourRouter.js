@@ -7,7 +7,7 @@ const roleAccess = require("../middleware/roleAccess");
 router.get(
   "/",
   protectAuth,
-  roleAccess("admin", "guide", "user"),
+
   tourController.getAllTours
 );
 

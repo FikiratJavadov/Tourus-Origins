@@ -16,6 +16,7 @@ const protectAuth = asyncCatch(async (req, res, next) => {
   }
 
   if (!token) return next(new GlobalErorr("Please Authenticate!", 400));
+  console.log(token);
 
   //! check if token valid
   const promiseVerify = promisify(jwt.verify);
