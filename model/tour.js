@@ -18,8 +18,17 @@ const tourSchema = mongoose.Schema(
     maxGroupSize: {
       type: Number,
       required: [true, "Group size must be defined!"],
-      min: 5,
-      max: 15,
+    },
+
+    startLocation: {
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      description: String,
+      coordinates: [Number],
+      address: String,
     },
 
     difficulty: {
@@ -56,8 +65,6 @@ const tourSchema = mongoose.Schema(
     summary: {
       type: String,
       required: [true, "Summary must be defined!"],
-      minLength: 10,
-      maxLength: 50,
     },
 
     description: {
@@ -105,8 +112,16 @@ const tourSchema = mongoose.Schema(
 
 //!Virtuals
 
+tourSchema.index({ startLocation: "2dsphere" });
+
 tourSchema.virtual("week").get(function () {
   return this.duration / 7;
+});
+
+tourSchema.virtual("reviews", {
+  ref: "review",
+  foreignField: "tour",
+  localField: "_id",
 });
 
 //!pre/post save - middleware

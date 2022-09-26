@@ -2,6 +2,7 @@ const Tour = require("../model/tour");
 const GlobalFilter = require("../utils/GlobalFilter");
 const { asyncCatch } = require("../utils/asyncCatch");
 const GlobalError = require("../error/GlobalError");
+const { deleteOne, getOne } = require("../utils/factory");
 
 exports.getAllTours = asyncCatch(async (req, res) => {
   const tours = new GlobalFilter(Tour.find(), req.query);
@@ -18,15 +19,7 @@ exports.getAllTours = asyncCatch(async (req, res) => {
   });
 });
 
-exports.getOneTour = asyncCatch(async (req, res, next) => {
-  const id = req.params.id;
-
-  const tour = await Tour.findById(id).populate("guides");
-
-  if (!tour) return next(new GlobalError("`Invalid ID`", 404));
-
-  res.json({ success: true, data: { tour } });
-});
+exports.getOneTour = getOne(Tour);
 
 // asyncCatch
 
@@ -53,15 +46,7 @@ exports.updateTour = asyncCatch(async (req, res) => {
   res.json({ success: true, data: { updatedTour } });
 });
 
-exports.deleteTour = asyncCatch(async (req, res) => {
-  const id = req.params.id;
-
-  const deletedTour = await Tour.findByIdAndRemove(id);
-
-  if (!deletedTour) return next(new GlobalError("`Invalid ID`", 404));
-
-  res.json({ success: true });
-});
+exports.deleteTour = deleteOne(Tour);
 
 exports.getStatistics = asyncCatch(async (req, res) => {
   const aggregateData = await Tour.aggregate([
@@ -133,6 +118,23 @@ exports.getMontlyPlan = asyncCatch(async (req, res) => {
       },
     },
   ]);
+
+  res.json({
+    success: true,
+    data: data,
+    length: data.length,
+  });
+});
+
+exports.getWithin = asyncCatch(async (req, res) => {
+  const { radius, latlog } = req.params;
+  const [lat, log] = latlog.split(",");
+
+  const r = radius / 6371;
+
+  const data = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[log, lat], r] } },
+  });
 
   res.json({
     success: true,

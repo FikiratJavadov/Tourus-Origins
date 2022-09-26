@@ -4,6 +4,8 @@ const Tour = require("../model/tour");
 const fs = require("fs");
 
 //! Start application:
+
+console.log(process.env.DB_STRING);
 const DB = process.env.DB_STRING.replace("<password>", process.env.DB_PASSWORD);
 
 mongoose.connect(DB, (err) => {
@@ -19,7 +21,7 @@ mongoose.connect(DB, (err) => {
       console.log(error);
     }
 
-    process.exit()
+    process.exit();
   }
 
   async function deleteData() {
@@ -29,7 +31,7 @@ mongoose.connect(DB, (err) => {
     } catch (error) {
       console.log(error);
     }
-    process.exit()
+    process.exit();
   }
 
   if (process.argv[2] === "import") {

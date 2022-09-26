@@ -4,6 +4,7 @@ const GlobalError = require("../error/GlobalError");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
+const { getOne } = require("../utils/factory");
 
 const signJWT = (id) => {
   const token = jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -47,3 +48,5 @@ exports.changeUserData = asyncCatch(async (req, res, next) => {
     user,
   });
 });
+
+exports.getOneUser = getOne(User);
