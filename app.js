@@ -51,6 +51,7 @@ app.use((req, res, next) => {
 app.use(globaleErrorHandler);
 
 //! Start application:
+
 const DB = process.env.DB_STRING.replace("<password>", process.env.DB_PASSWORD);
 
 mongoose.connect(DB, (err) => {

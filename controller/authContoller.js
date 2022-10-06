@@ -4,6 +4,8 @@ const GlobalError = require("../error/GlobalError");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
+const Email = require("../utils/email");
+const cloudinary = require("../utils/cloudinary");
 
 const signJWT = (id) => {
   const token = jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,6 +16,13 @@ const signJWT = (id) => {
 };
 
 exports.signup = asyncCatch(async (req, res, next) => {
+  // let image;
+  // if (req.file) {
+  //   image = await cloudinary.uploader.upload(req.file.path);
+  // }
+
+  // console.log(image);
+
   const user = await User.create({
     name: req.body.name,
     email: req.body.email,
@@ -21,6 +30,11 @@ exports.signup = asyncCatch(async (req, res, next) => {
     confirmPassword: req.body.confirmPassword,
   });
   //! Give the permission
+
+  //!Send Email
+  const url = `${req.protocol}://${req.get("host")}`;
+  const emailHandler = new Email(user, url);
+  await emailHandler.sendWelcome();
 
   const token = signJWT(user._id);
 
@@ -69,11 +83,8 @@ exports.forgetPassword = asyncCatch(async (req, res, next) => {
 
   const urlString = `${req.protocol}://${req.get("host")}/${resetToken}`;
 
-  await sendEmail({
-    email: user.email,
-    subject: "Change password!",
-    message: `Please follow the link: ${urlString}`,
-  });
+  const emailHandler = new Email(user, urlString);
+  await emailHandler.sendResetPassword();
 
   res.status(200).json({
     success: true,

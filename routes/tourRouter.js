@@ -22,7 +22,6 @@ router.get(
 router.get("/withinRadius/:radius/location/:latlog", tourController.getWithin);
 router.get("/:id", tourController.getOneTour);
 
-
 //* Portected and Role middlewares
 router.use(protectAuth);
 router.use(roleAccess("admin"));

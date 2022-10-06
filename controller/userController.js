@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
 const { getOne } = require("../utils/factory");
+const cloudinary = require("../utils/cloudinary");
 
 const signJWT = (id) => {
   const token = jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -49,4 +50,17 @@ exports.changeUserData = asyncCatch(async (req, res, next) => {
   });
 });
 
-exports.getOneUser = getOne(User);
+exports.deleteMe = asyncCatch(async (req, res, next) => {
+  const me = await User.findById(req.user._id);
+
+  if (me.imgId) {
+    await cloudinary.uploader.destroy(me.imgId);
+  }
+
+  me.delete();
+
+  res.json({
+    success: true,
+    message: "User deleted",
+  });
+});
