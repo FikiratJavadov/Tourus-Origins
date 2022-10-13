@@ -13,6 +13,7 @@ const globaleErrorHandler = require("./error/errorHandler");
 const tourRouter = require("./routes/tourRouter");
 const userRouter = require("./routes/userRouter");
 const reviewRouter = require("./routes/reviewRouter");
+const bookingRouter = require("./routes/bookingRouter");
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
 app.use("/tour", tourRouter);
 app.use("/user", userRouter);
 app.use("/review", reviewRouter);
+app.use("/booking", bookingRouter);
 
 app.use((req, res, next) => {
   next(new GlobalError(`${req.originalUrl} does not exist!`, 500));
